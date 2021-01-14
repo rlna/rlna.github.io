@@ -8,7 +8,7 @@ body {
   margin: 0;
   padding-top: 100px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap-reverse;
   align-items: topmargin;
   transition-duration: 0.6s;
 }
