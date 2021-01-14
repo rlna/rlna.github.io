@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+    div.padded {
+      padding-top: 0px;
+      padding-right: 100px;
+      padding-bottom: 0.25in;
+      padding-left: 100px;
+    }
+  </style>
+<title>PathTracer 2</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">PathTracer Part 2</h1>
+<h2 align="middle">(<a href="pathtracer.html">Part 1</a>)</h2>
+    <h2 align="middle">Rina Lu</h2>
+
+    <div class="padded">
+        <p>In this assignment, I implemented the second part of PathTracer, where I implemented various BRDF functions modeled after real life materials. </p>
+
+    <h2 align="middle">Part 1: Ray Generation and Intersection</h2>
+        <p>In Part 1, I implemented models for reflection and refraction, to be used by mirror and glass materials. In the images below, I show how the mirror and glass material models react to increasing the number of light bounces. When there are 0 bounces, only light is shown from the light source, since 0 bounces means the light rays do not hit anything. At 1 bounce, only direct lighting is shown, so the scene is illuminated but the reflective and refraction materials are not. With increasing bounces, as indirect light increases, the mirror material shows a brighter reflection of the external surroundings, while the glass material shows more and more refraction as it becomes more brightly lit internally, and its shadow becomes brighter as well. You can also see the effects of the glass material in the reflection of the mirror material. </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/p2im/task 1/spheres_0.png" width="300px" />
+                    <figcaption align="middle">With max_ray_depth of 0.</figcaption>
+                    <td align="middle">
+                    <img src="images/p2im/task 1/spheres_1.png" width="300px" />
+                    <figcaption align="middle">With max_ray_depth of 1.</figcaption>
+                    <td align="middle">
+                    <img src="images/p2im/task 1/spheres_2.png" width="300px" />
+                    <figcaption align="middle">With max_ray_depth of 2.</figcaption>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/p2im/task 1/spheres_3.png" width="300px" />
+                    <figcaption align="middle">With max_ray_depth of 3.</figcaption>
+                    <td align="middle">
+                    <img src="images/p2im/task 1/spheres_4.png" width="300px" />
+                    <figcaption align="middle">With max_ray_depth of 4.</figcaption>
+                    <td align="middle">
+                    <img src="images/p2im/task 1/spheres_5.png" width="300px" />
+                    <figcaption align="middle">With max_ray_depth of 5.</figcaption>
+                </tr>
+            </table>
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/p2im/task 1/spheres_100.png" width="480px" />
+                    <figcaption align="middle">With max_ray_depth of 100.</figcaption>
+                </tr>
+            </table>
+        </div>
+
+
+        <h2 align="middle">Part 2: Microfacet Material</h2>
+            <p>In the images below, you can see how, by increasing the alpha value, the material of the dragon becomes less reflective and appears more diffuse. With a larger alpha value, the distribution of microfacet normals is more spread out, so the material appears less glossy.</p>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                        <img src="images/p2im/task 2/dragon_0.005.png" width="300px" />
+                        <figcaption align="middle">With alpha value of 0.005.</figcaption>
+                        <td align="middle">
+                        <img src="images/p2im/task 2/dragon_0.05.png" width="300px" />
+                        <figcaption align="middle">With alpha value of 0.05.</figcaption>
+                    </tr>
+                    <tr>
+                        <td align="middle">
+                        <img src="images/p2im/task 2/dragon_0.25.png" width="300px" />
+                        <figcaption align="middle">With alpha value of 0.25.</figcaption>
+                        <td align="middle">
+                        <img src="images/p2im/task 2/dragon_0.5.png" width="300px" />
+                        <figcaption align="middle">With alpha value of 0.5.</figcaption>
+                    </tr>
+            </div>
+            <p>Below, I sampled the bunny using cosine hemispher sampling and with importance sampling. Cosine hemisphere sampling is inefficient and results in more noise and a less accurate rendering of the material. </p>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                        <img src="images/p2im/task 2/bunny_ch.png" width="300px" />
+                        <figcaption align="middle">Bunny rendered with cosine hemisphere sampling.</figcaption>
+                        <td align="middle">
+                        <img src="images/p2im/task 2/bunny_is.png" width="300px" />
+                        <figcaption align="middle">Bunny rendered with importance sampling.</figcaption>
+                    </tr>
+            </div>
+</div>
+</body>
+</html>

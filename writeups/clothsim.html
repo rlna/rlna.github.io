@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>Cloth Simulator</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h1 align="middle">Cloth Simulator</h1>
+<h2 align="middle">Rina Lu</h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>In this project, I learned to animate a cloth material based on its physical properties. I learned how to create the cloths structure, how to manipulate the structure based on forces acting upon it in its environment, how to model the cloths interactions with other objects, and how to shade the cloth. </p>
+
+<h2 align="middle">Part I: Masses and springs</h2>
+<p>In order to animate the cloth material, I first had to implement its structure. I did so by creating a grid of point masses to represent the intersections of the strings in the cloth, and implemented springs between each point mass in three orientations, structural, shearing, and bending. The springs assist in the animation of the cloth, and help to create a realistic rendering of how the cloth is affected by various forces by maintaining the material's basic form.</p>
+<div align="center">
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+            <img src="images/cloth/task 1/cloth1.png" width="800px" />
+          </tr>
+          <tr>
+            <td align="middle">
+            <img src="images/cloth/task 1/cloth2.png" width="800px" />
+          </tr>
+            <figcaption align="middle">Wireframe of cloth without and with the effects of gravity.</figcaption>
+</table>
+<table style="width=100%">
+        <tr>
+            <td align="middle">
+                          <figcaption align="middle">With all constraints.</figcaption>
+            <img src="images/cloth/task 1/all.png" width="800px" />
+          </tr>
+          <tr>
+            <td align="middle">
+                  <figcaption align="middle">Without shearing constraints.</figcaption>
+            <img src="images/cloth/task 1/noshearing.png" width="800px" />
+
+          </tr>
+          <tr>
+            <td align="middle">
+              <figcaption align="middle">With only shearing constraints.</figcaption>
+            <img src="images/cloth/task 1/shearing.png" width="800px" />
+        </tr>
+    </table>
+
+
+<h2 align="middle">Part II: Simulation via numerical integration</h2>
+<p>Once the basic frame of the cloth was constructed, I could begin simulating the effects of forces on it. First, I calculated the total external force acting on the cloth, and applied the force to each of its point masses. Next, I applied the spring correction forces to each spring, and adjusted the bending constraing forces to be weaker. After applying the external forces to the structure of the cloth, I calculated the new positions each point mass would take on in the next time step, using Verlet integration. If a point mass was pinned, its position did not change. Finally, to account for the effect of the springs on the cloth's movement, I constrained the change in length between positions such that it did not exceed more than 10% per timestep. I did this by iterating through the springs, and accessing the position of both of its point masses to see if their difference was greater than the rest length of the spring multiplied by 1.1. If it was, I calculated a correction vector to be added to each point mass. After completing this section, I could simulate a cloth falling due to gravity.</p>
+
+<div align="center">
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+            <img src="images/cloth/task 2/smallks.png" width="480px" />
+            <figcaption align="middle">Small ks.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 2/largeks.png" width="480px" />
+            <figcaption align="middle">Large ks..</figcaption>
+          </tr>
+            <td align="middle">
+            <img src="images/cloth/task 2/smalld.png" width="480px" />
+            <figcaption align="middle">Small density.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 2/larged.png" width="480px" />
+            <figcaption align="middle">Large density.</figcaption>
+        </tr>
+        <tr>
+
+            <td align="middle">
+            <img src="images/cloth/task 2/smallda.png" width="480px" />
+            <figcaption align="middle">Small damping.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 2/largeda.png" width="480px" />
+            <figcaption align="middle">Large damping.</figcaption>
+        </tr>
+    </table>
+    <div align="center">
+        <table style="width=100%">
+            <tr>
+                <td align="middle">
+                <img src="images/cloth/task 2/cloth.png" width="500px" />
+                <figcaption align="middle">The cloth pinned at 4 points.</figcaption>
+              </tr>
+            </table>
+            <p> A small ks, or spring constant, created more wrinkles in the cloth, as well as more movement. A large ks had less movement, and less wrinkles and flexibility in the cloth. A small density also allowed for more movement, while a large density made the cloth slow and heavy, causing a larger bend between the two pins. A small damping value created a lot more movement and oscillation, while a higher damping yielded less movement. </p>
+
+<h2 align="middle">Part III: Handling collisions with other objects</h2>
+<p>I implemented the effects of the cloth colliding with other objects by manipulating the positions of each point mass such that they never end up inside the object. If the point masses' positions were inside the object, I bumped them back up to the surface of the object. I implemented this for both a sphere and a plane. </p>
+<div align="center">
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+            <img src="images/cloth/task 3/500.png" width="300px" />
+            <figcaption align="middle">Cloth with ks 500..</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 3/5000.png" width="300px" />
+            <figcaption align="middle">Cloth with ks 5000.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 3/50000.png" width="300px" />
+            <figcaption align="middle">Cloth with ks 50000..</figcaption>
+        </tr>
+      </table>
+<p> A higher spring constant, ks, yielded a stiffer cloth that bended less.
+      <div align="center">
+          <table style="width=100%">
+        <tr>
+            <td align="middle">
+            <img src="images/cloth/task 3/plane.png" width="480x" />
+            <figcaption align="middle">Cloth lying on plane.</figcaption>
+        </tr>
+    </table>
+
+<h2 align="middle">Part IV: Handling self-collisions</h2>
+<p>In addition to handling collisions between the cloth and external objects, I also needed to handle collisions between the cloth and itself. Before implementing this section, the cloth fell straight through itself, but after, the cloth reacted upon collision with itself. I implemented self collision by using a hash function to create a spatial map of all the point masses, and used this to check to see if each point mass coincided with another. If the point masses collided, I applied a correction vector. </p>
+<div align="center">
+    <table style="width=100%">
+        <tr>
+
+            <td align="middle">
+            <img src="images/cloth/task 4/a1.png" height="350px" />
+            <td align="middle">
+            <img src="images/cloth/task 4/a2.png" height="350px" />
+            <td align="middle">
+            <img src="images/cloth/task 4/a3.png" height="350px" />
+            <td align="middle">
+            <img src="images/cloth/task 4/a4.png" height="350px" />
+          </tr>
+                    <figcaption align="middle">Cloth falling on itself.</figcaption>
+        </table>
+
+<p>I varied the density and spring constant to see how they would affect the cloth falling on itself. I found that with a higher density, the cloth crumpled more directly on top of itself, and had tighter folds, while a smaller density caused large folds in the cloth and less wrinkles. On the other hand, a larger spring constant created larger folds and a stiffer cloth, while a smaller spring constant yielded more wrinkles.</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                      <td align="middle">
+                      <img src="images/cloth/task 4/d501.png" height="280px" />
+                      <td align="middle">
+                      <img src="images/cloth/task 4/d2.png" height="280px" />
+                      <td align="middle">
+                      <img src="images/cloth/task 4/d3.png" height="280px" />
+                      <td align="middle">
+                      <img src="images/cloth/task 4/d4.png" height="280px" />
+        </tr>
+      </table>
+              <p>Large density.</p>
+      <div align="center">
+          <table style="width=100%">
+        <tr>
+          <td align="middle">
+          <img src="images/cloth/task 4/d51.png" height="280px" />
+          <td align="middle">
+          <img src="images/cloth/task 4/d52.png" height="280px" />
+          <td align="middle">
+          <img src="images/cloth/task 4/d53.png" height="280px" />
+          <td align="middle">
+          <img src="images/cloth/task 4/d54.png" height="280px" />
+        </tr>
+      </table>
+                    <p>Small density.</p>
+      <div align="center">
+          <table style="width=100%">
+        <tr>
+  <td align="middle">
+      <img src="images/cloth/task 4/ks501.png" height="350px" />
+            <td align="middle">
+            <img src="images/cloth/task 4/ks2.png" height="350px" />
+              <td align="middle">
+              <img src="images/cloth/task 4/ks3.png" height="350px" />
+      </tr>
+  </table>
+    <p>Large spring constant.</p>
+    <div align="center">
+        <table style="width=100%">
+      <tr>
+<td align="middle">
+    <img src="images/cloth/task 4/ks5.png" height="350px" />
+          <td align="middle">
+          <img src="images/cloth/task 4/ks52.png" height="350px" />
+            <td align="middle">
+            <img src="images/cloth/task 4/ks53.png" height="350px" />
+    </tr>
+</table>
+  <p>Small Spring constant.</p>
+
+
+<h2 align="middle">Part V: Shaders</h2>
+<p>A shader program is a program that runs computations in parallel on the GPU. They are used to manipulate the lighting and shading effects, taking in various inputs such as a texture file, and outputs a single 4 dimensional vector. Vertex shaders affect the positions of the vertices by applying transforms to them, and fragment shaders affect the color and texture by taking calculations from the vertex shader. </p>
+<p> The Blinn-Phong shading model blends ambient, diffuse, and specular components of lighting to create a realistic, cohesive lighting rendering.</p>
+<div align="center">
+    <table style="width=100%">
+        <tr>
+            <td align="middle">
+            <img src="images/cloth/task 5/bpa.png" height="200px"/>
+            <figcaption align="middle">Blinn-Phong with only ambient component.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 5/bpd.png" height="200px" />
+            <figcaption align="middle">Blinn-Phong with only diffuse component.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 5/bps.png" height="200px" />
+            <figcaption align="middle">Blinn-Phong with only specular component.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 5/bp.png" height="200px"/>
+            <figcaption align="middle">Blinn-Phong with all parts implemented.</figcaption>
+        </tr>
+        <tr>
+            <td align="middle">
+            <img src="images/cloth/task 5/1t.png" height="200px" />
+            <td align="middle">
+            <img src="images/cloth/task 5/2t.png" height="200px" />
+            <td align="middle">
+            <img src="images/cloth/task 5/3t.png" height="200px" />
+            <td align="middle">
+            <img src="images/cloth/task 5/4t.png" height="200px" />
+        </tr>
+    </table>
+    <p>Texture-mapped cloth.</p>
+
+    <div align="center">
+        <table style="width=100%">
+            <tr>
+              <td align="middle">
+              <img src="images/cloth/task 5/bump1.png"height="200px" />
+              <figcaption align="middle">Bump-mapping on sphere.</figcaption>
+              <td align="middle">
+              <img src="images/cloth/task 5/bump2.png" height="200px" />
+              <figcaption align="middle">Bump-mapping on cloth.</figcaption>
+              <td align="middle">
+              <img src="images/cloth/task 5/dis1.png" height="200px" />
+              <figcaption align="middle">Displacement-mapping on sphere.</figcaption>
+              <td align="middle">
+              <img src="images/cloth/task 5/dis2.png" height="200px" />
+              <figcaption align="middle">Displacement-mapping on cloth.</figcaption>
+            </tr>
+            <td align="middle">
+            <img src="images/cloth/task 5/bump16.png" height="200px" />
+            <figcaption align="middle">Bump with -o 16 -a 16.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 5/bump216.png" height="200px" />
+                        <figcaption align="middle">Sphere less visible under cloth.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 5/dis16.png" height="200px" />
+            <figcaption align="middle">Displacement with -o 16 -a 16.</figcaption>
+            <td align="middle">
+            <img src="images/cloth/task 5/dis216.png" height="200px" />
+            <figcaption align="middle">Displacement is more inaccurate.</figcaption>
+          </tr>
+          <td align="middle">
+          <img src="images/cloth/task 5/bump128.png" height="200px" />
+          <figcaption align="middle">Bump with -o 128 -a 128.</figcaption>
+          <td align="middle">
+          <img src="images/cloth/task 5/bump2128.png" height="200px" />
+                                  <figcaption align="middle">Sphere more visible under cloth.</figcaption>
+          <td align="middle">
+          <img src="images/cloth/task 5/dis128.png" height="200px" />
+          <figcaption align="middle">Displacement with -o 128 -a 128.</figcaption>
+          <td align="middle">
+          <img src="images/cloth/task 5/dis2128.png" height="200px" />
+          <figcaption align="middle">Displacement is more accurate.</figcaption>
+        </tr>
+        </table>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/cloth/task 5/mirror1.png" width="480px" />
+                    <figcaption align="middle">Mirror shading on sphere.</figcaption>
+                    <td align="middle">
+                    <img src="images/cloth/task 5/mirror2.png" height="470px" />
+                    <figcaption align="middle">Mirror shading on cloth.</figcaption>
+                </tr>
+            </table>
+
+
+</body>
+</html>

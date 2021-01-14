@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Colorizer</title>
+    </head>
+    <style>
+      body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Cambria', sans-serif;
+        color: #121212;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Arial', sans-serif;
+      }
+    </style>
+    <body>
+
+      <h1 align="middle">Colorizer</h1>
+        <!-- Your content here! -->
+        <section>
+          <h2 align="middle">Overview</h2>
+          <p>Before color photography existed, <a href="https://en.wikipedia.org/wiki/Sergey_Prokudin-Gorsky">Sergei Mikhailovich Prokudin-Gorskii</a> came up with an ingenious way to preserve color in black and white photography. In order to capture color, he took three black and white photos of every scene: one with a red filter, one with a green filter, and one with a blue filter. From these glass plate images, we can recreate color photos by extracting the three color channel images, aligning them, and overlaying them to create a single RGB color image. I used images found at the Library of Congress' online collection, <a href="https://www.loc.gov/pictures/collection/prok/">here</a>.</p>
+          <h2 align="middle">Implementation</h2>
+            <p>My implementation was split into three parts: image preprocessing, image alignment, and image overlay. During image preprocessing, I split the original black and white photos into three parts to extract its blue, green, and red channels. To align my image, I exhaustively searched over a range of x and y values to shift my image by. During alignment only, I used a basic crop function to get rid of irregularities at the border of each image, so that my image matching metric would be more accurate. I used the range (-15, 15) to determine the x, y values to displace my image by, and the function np.roll to shift my image. I displaced my image by each (x, y) pair, and used the sum of squared differences as my image matching metric. I found the (x, y) coordinate associated with the minimum SSD to find the best alignment. For larger tiff images, exhaustive search took far too long. To speed up the search, I implemented an image pyramid. In my image pyramid, I rescaled the image using a scale of 0.5 until the image's height was smaller than 300 pixels. I was able to find an estimate for best alignment quickly by searching on the smallest image, and using the estimate to narrow my search for the next largest image of the pyramid. Using estimates at every level, I could then quickly channel back out to the original, large image, and find its best alignment. Finally, I applied the best displacements to each image channel, and overlayed the three channels to produce a color image.
+            </p>
+            <div align="center">
+            <table style="width=100%">
+                <tr>
+                  <td align="middle">
+                  <img src="images/nocroplady.jpg" height="500px" />
+                  <figcaption align="middle">Initial image with no crop or white balance.</figcaption>
+                </tr>
+            </table>
+            </div>
+          <h2 align="middle">Bells & Whistles</h2>
+          <h3 align="middle">Auto White Balance</h3>
+          <p>To implement automatic white balancing, I converted the image to grayscale and found its brightest pixel. Once I found its brightest pixel, I scaled the pixels of the image in accordance to its brightest pixel, so that the brightest pixel would be white. </p>
+          <div align="center">
+              <table style="width=100%">
+                  <tr>
+                  <td align="middle">
+                  <img src="images/kids.jpg" height="350px" />
+                  <figcaption align="middle">Without AWB.</figcaption>
+                  <td align="middle">
+                  <img src="images/awb_kids.jpg" height="350px" />
+                  <figcaption align="middle">With AWB.</figcaption>
+                </tr>
+                <tr>
+                  <td align="middle">
+                  <img src="images/three_generations.jpg" height="350px" />
+                  <td align="middle">
+                  <img src="images/awb_three_generations.jpg" height="350px" />
+                </tr>
+
+                  </table>
+          <h4 align="middle">Auto Crop</h4>
+          <p>At first, I was using a basic crop function, which I utilized during alignment. The basic crop function used the dimensions of the image to take 1/14th of the image out from each border. Since the basic crop often took out more of the photo than necessary, I wanted to use an automatic cropping function to preserve as much of the image as possible. To implement automatic cropping, I began at the corner pixels for each color channel and spiraled inward until the pixel was not white or black (had a value of 1 or 0, with a threshold of 0.1). Then, I found the maximum coordinate value of each corner spiral and each color channel, and cropped all the channels uniformly based on the maximum value. I cropped the channels before alignment to make alignment quicker. After alignment, I implemented a second crop function, a rolling crop, to get rid of any discoloration caused during alignment.</p>
+          <div align="center">
+              <table style="width=100%">
+                  <tr>
+                    <td align="middle">
+                    <img src="images/nocroplady.jpg" height="270px" />
+                    <figcaption align="middle">With no crop.</figcaption>
+                  <td align="middle">
+                  <img src="images/croplady.jpg" height="270px" />
+                  <figcaption align="middle">With a basic crop.</figcaption>
+                  <td align="middle">
+                  <img src="images/roll2lady.jpg" height="270px" />
+                  <figcaption align="middle">With auto + rolling crop.</figcaption>
+                </tr>
+                </table>
+            </div>
+            <div align="center">
+            <table style="width=100%">
+                <tr>
+                  <td align="middle">
+                  <img src="images/roll_lady.jpg" height="500px" />
+                  <figcaption align="middle">With a larger auto crop + rolling crop.</figcaption>
+                </tr>
+            </table>
+            </div>
+            <h2 align="middle">Difficulties</h2>
+            <p>
+              At first during image alignment, I was searching for the best vertical displacement alone, and then the best horizontal displacement after, instead of searching for all displacements in the (x,y) ranges. Because I was not using an exhaustive search, alignment was inaccurate. </p>
+              <div align="center">
+                  <table style="width=100%">
+                      <tr>
+                        <td align="middle">
+                        <img src="images/first/first_try_cathedral.jpg" height="300px" />
+                        <figcaption align="middle">First try.</figcaption>
+                        <td align="middle">
+                        <img src="images/first/out_cathedral.jpg" height="300px" />
+                        <figcaption align="middle">With exhaustive search.</figcaption>
+                      </tr>
+                    </table>
+            </div>
+            <p>When first implementing autocrop, I was unable to completely remove the black borders from the photos. Upon closer inspection, I realized this was because the borders were not entirely black, likely due to fading or wear on the original, physical image. To compensate for this, I multiplied the horizontal crop dimensions found from my autocrop function by a factor of 1.5, and rounded it to the nearest integer. </p>
+            <p>While I was able to quickly resolve the alignment and cropping issues, I could not successfully align the emir.tif image. Because the emir image has different brightness for its channels, and because of the emir's bright and colorful dress, alignment using the SSD metric was unsuccessful and difficult to fix without also adjusting the brightness and color of the three channels. </p>
+            <table style="width=100%">
+                <tr>
+                  <td align="middle">
+                  <img src="images/awb_emir.jpg" height="400px" />
+                  <figcaption align="middle">Unsuccessful alignment.</figcaption>
+                </tr>
+              </table>
+            <div align="center">
+
+            <h2 align="middle">Favorite Photo</h2>
+            <p>Before working on this project, my housemate had developed a special interest in the Prokudin-Gorskii collection, due to the fact that her family is from Central Asia and the collection demonstrates everyday life prior to Soviet influence. As a Jewish person from Tajikistan, she was drawn to a particular photo because of how it exhibits traditional cultural practices of Central Asian Jews that are often forgetten after Soviet rule and the diaspora of the 1990s. This photo is reproduced below and is my favorite photo that I colorized. Not only does it have a special connection through my housemate's interest in the collection, but the bright colors, crisp lines, and crooked table centered in the photo make it especially aesthetically appealing.
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                      <td align="middle">
+                      <img src="images/awb_for_sophia.jpg" height="550px" />
+                      <figcaption align="middle">g: (38, 71), r: (62, 148)</figcaption>
+                    </tr>
+                  </table>
+            </div>
+        <h2 align="middle">Gallery</h2>
+
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                  <td align="middle">
+                  <img src="images/pair.jpg" height="270px" />
+                  <figcaption align="middle">g: (19, 60), r: (21, 127)</figcaption>
+                  <td align="middle">
+                  <img src="images/awb_cathedral.jpg" height="270px" />
+                  <figcaption align="middle">g: (2, 5), r: (3, 12)</figcaption>
+                  <td align="middle">
+                  <img src="images/awb_self_portrait.jpg" height="270px" />
+                  <figcaption align="middle">g: (29, 78), r: (37, 176)</figcaption>
+
+                </tr>
+                <tr>
+                  <td align="middle">
+                  <img src="images/icon.jpg" height="270px" />
+                  <figcaption align="middle">g: (17, 41), r: (23, 89)</figcaption>
+                <td align="middle">
+                <img src="images/awb_lady.jpg" height="270px" />
+                <figcaption align="middle">g: (9, 51), r: (11, 112)</figcaption>
+                <td align="middle">
+                <img src="images/o.jpg" height="270px" />
+                <figcaption align="middle">g: (13, 18), r: (23, 79)</figcaption>
+              </tr>
+              <tr>
+                <td align="middle">
+                <img src="images/awb_melons.jpg" height="270px" />
+                <figcaption align="middle">g: (10, 81), r: (13, 178)</figcaption>
+                <td align="middle">
+                <img src="images/onion_church.jpg" height="270px" />
+                <figcaption align="middle">g: (27, 51), r: (36, 108)</figcaption>
+                <td align="middle">
+                <img src="images/awb_three_generations.jpg" height="270px" />
+                <figcaption align="middle">g: (14, 53), r: (11, 112)</figcaption>
+
+            </tr>
+            <tr>
+              <td align="middle">
+              <img src="images/monastery.jpg" height="270px" />
+              <figcaption align="middle">g: (2, -3), r: (2, 3)</figcaption>
+              <td align="middle">
+              <img src="images/awb_harvesters.jpg" height="270px" />
+              <figcaption align="middle">g: (16, 59), r: (13, 124)</figcaption>
+              <td align="middle">
+              <img src="images/awb_train.jpg" height="270px" />
+              <figcaption align="middle">g: (5, 42), r: (32, 87)</figcaption>
+
+
+            </tr>
+                    <tr>
+                      <td align="middle">
+                      <img src="images/awb_castle.jpg" height="270px" />
+                      <figcaption align="middle">g: (3, 35), r: (4, 98)</figcaption>
+                        <td align="middle">
+                        <img src="images/tobolsk.jpg" width="270px" />
+                        <figcaption align="middle">g: (3, 3), r: (3, 6)</figcaption>
+                        <td align="middle">
+                        <img src="images/awb_workshop.jpg" height="270px" />
+                        <figcaption align="middle">(0, 52), r: (-12, 105)</figcaption>
+                    </tr>
+                </table>
+          </div>
+          <div>
+
+    </body>
+</html>
